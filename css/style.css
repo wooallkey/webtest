@@ -1029,10 +1029,20 @@ body {
         align-items: flex-start;
     }
 
+    /* 互动按钮改为抖音式：竖排贴在视频右侧 */
     .interaction-panel {
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-around;
+        position: absolute;
+        right: 12px;
+        bottom: 90px;       /* 避开底部控制条 */
+        flex-direction: column;
+        width: auto;
+        gap: 18px;
+        z-index: 25;
+    }
+
+    /* 视频信息给右侧留出按钮空间，避免文字与按钮重叠 */
+    .video-info {
+        padding-right: 64px;
     }
 
     /* ===== 视频中央暂停指示器（抖音风）===== */
