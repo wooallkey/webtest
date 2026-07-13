@@ -17,3 +17,19 @@ npm-debug.log*
 
 # 依赖（本项目无构建，预留）
 node_modules/
+
+# 密钥与凭据（绝不可提交，敏感！）
+*.pem
+*.key
+*.ppk
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+*.p12
+*.pfx
+.env
+.env.*
+.ssh/
