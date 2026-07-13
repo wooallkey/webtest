@@ -180,7 +180,8 @@
 
 @media (max-width: 768px) {
     .following-header {
-        padding: 15px 20px;
+        /* 左侧留出三杆按钮空间，避免与菜单图标重叠 */
+        padding: 15px 20px 15px 64px;
     }
 
     .user-list {

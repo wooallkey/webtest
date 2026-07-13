@@ -433,11 +433,11 @@ body {
     width: 0;
     height: 4px;
     border-radius: 2px;
+    /* 填充比例由 JS 动态设置 background 渐变；默认(0%)无红色填充 */
     background: rgba(255, 255, 255, 0.3);
     cursor: pointer;
     opacity: 0;
     transition: width 0.25s, opacity 0.25s;
-    overflow: hidden;
 }
 
 /* 桌面端：hover 控制条时滑块展开 */
@@ -456,7 +456,6 @@ body {
     border-radius: 50%;
     background: var(--accent-color);
     cursor: pointer;
-    box-shadow: -80px 0 0 76px var(--accent-color);
 }
 
 .volume-slider::-moz-range-thumb {
@@ -466,6 +465,13 @@ body {
     border-radius: 50%;
     background: var(--accent-color);
     cursor: pointer;
+}
+
+/* Firefox 填充：用 ::-moz-range-progress */
+.volume-slider::-moz-range-progress {
+    background: var(--accent-color);
+    height: 4px;
+    border-radius: 2px;
 }
 
 /* 右侧视频列表 */
@@ -693,7 +699,7 @@ body {
 
 .comment-input-section {
     padding: 20px;
-    border-bottom: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
 }
 
 .comment-input-section textarea {
@@ -707,14 +713,17 @@ body {
     resize: none;
     height: 80px;
     outline: none;
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    transition: margin-bottom 0.2s;
 }
 
 .comment-input-section textarea:focus {
     border-color: var(--accent-color);
 }
 
+/* 发送按钮：默认隐藏，评论框聚焦时显示 */
 .send-comment-btn {
+    display: none;
     padding: 8px 20px;
     background-color: var(--accent-color);
     color: white;
@@ -724,6 +733,11 @@ body {
     font-size: 14px;
     font-weight: 500;
     float: right;
+    margin-top: 10px;
+}
+
+.comment-input-section textarea:focus + .send-comment-btn {
+    display: block;
 }
 
 .comments-list {

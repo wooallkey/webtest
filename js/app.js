@@ -287,7 +287,10 @@ function renderComments() {
 }
 
 // 发送评论
-document.querySelector('.send-comment-btn').addEventListener('click', () => {
+const sendCommentBtnEl = document.getElementById('sendCommentBtn');
+// 阻止发送按钮抢焦点，避免 textarea 失焦导致按钮消失而点不到
+sendCommentBtnEl.addEventListener('mousedown', (e) => e.preventDefault());
+sendCommentBtnEl.addEventListener('click', () => {
     const input = document.getElementById('commentInput');
     const text = input.value.trim();
 
@@ -427,12 +430,37 @@ document.querySelector('.fullscreen').addEventListener('click', () => {
 let isMuted = true;
 const volumeBtn = document.querySelector('.volume');
 const volumeSlider = document.getElementById('volumeSlider');
+const mobileVolumeBtn = document.getElementById('mobileVolumeBtn');
+const mobileVolumeSlider = document.getElementById('mobileVolumeSlider');
 
 // 根据音量返回对应图标
 function volumeIcon(vol, muted) {
     if (muted || vol === 0) return '🔇';
     if (vol < 0.5) return '🔈';
     return '🔊';
+}
+
+// 给一个滑块设置红色填充比例（静音或0时不填充）
+function paintSlider(slider, percent) {
+    if (!slider) return;
+    const p = Math.max(0, Math.min(100, percent));
+    if (p <= 0) {
+        slider.style.background = 'rgba(255, 255, 255, 0.3)';
+    } else {
+        slider.style.background =
+            `linear-gradient(to right, var(--accent-color) ${p}%, rgba(255,255,255,0.3) ${p}%)`;
+    }
+}
+
+// 统一刷新音量 UI：图标 + 两个滑块的值与填充
+function updateVolumeUI() {
+    const eff = isMuted ? 0 : mainVideo.volume;
+    const percent = Math.round(eff * 100);
+    const icon = volumeIcon(mainVideo.volume, isMuted);
+    volumeBtn.textContent = icon;
+    if (volumeSlider) { volumeSlider.value = percent; paintSlider(volumeSlider, percent); }
+    if (mobileVolumeBtn) mobileVolumeBtn.textContent = icon;
+    if (mobileVolumeSlider) { mobileVolumeSlider.value = percent; paintSlider(mobileVolumeSlider, percent); }
 }
 
 // 静音按钮：在静音与上次音量间切换
@@ -444,9 +472,8 @@ volumeBtn.addEventListener('click', function() {
         // 取消静音：恢复上次音量（若为0则用1）
         const v = lastVolume > 0 ? lastVolume : 1;
         mainVideo.volume = v;
-        volumeSlider.value = Math.round(v * 100);
     }
-    this.textContent = volumeIcon(mainVideo.volume, isMuted);
+    updateVolumeUI();
     mainVideo.play().catch(() => {});   // 用户主动点击，可解除自动播放限制
 });
 
@@ -457,7 +484,7 @@ volumeSlider.addEventListener('input', function() {
     lastVolume = v;
     isMuted = v === 0;       // 拖到0视为静音
     mainVideo.muted = isMuted;
-    volumeBtn.textContent = volumeIcon(v, isMuted);
+    updateVolumeUI();
 });
 
 // 上传区域：选择视频素材（复用首页真实视频文件作为发布内容）
@@ -599,9 +626,8 @@ document.addEventListener('keydown', (e) => {
             mainVideo.muted = isMuted;
             if (!isMuted) {
                 mainVideo.volume = lastVolume > 0 ? lastVolume : 1;
-                volumeSlider.value = Math.round(mainVideo.volume * 100);
             }
-            volumeBtn.textContent = volumeIcon(mainVideo.volume, isMuted);
+            updateVolumeUI();
             break;
         case 'KeyF':
             if (document.fullscreenElement) {
@@ -715,15 +741,7 @@ playerForClick.addEventListener('click', (e) => {
     }
 });
 
-// ===== 手机端音量浮层：与主音量状态同步 =====
-const mobileVolumeBtn = document.getElementById('mobileVolumeBtn');
-const mobileVolumeSlider = document.getElementById('mobileVolumeSlider');
-
-function syncMobileVolume() {
-    mobileVolumeBtn.textContent = volumeIcon(mainVideo.volume, isMuted);
-    mobileVolumeSlider.value = Math.round((isMuted ? 0 : mainVideo.volume) * 100);
-}
-
+// ===== 手机端音量浮层：复用主音量状态（updateVolumeUI 统一驱动）=====
 mobileVolumeBtn.addEventListener('click', function() {
     isMuted = !isMuted;
     mainVideo.muted = isMuted;
@@ -731,8 +749,7 @@ mobileVolumeBtn.addEventListener('click', function() {
         const v = lastVolume > 0 ? lastVolume : 1;
         mainVideo.volume = v;
     }
-    volumeBtn.textContent = volumeIcon(mainVideo.volume, isMuted);
-    syncMobileVolume();
+    updateVolumeUI();
     mainVideo.play().catch(() => {});
 });
 
@@ -742,9 +759,8 @@ mobileVolumeSlider.addEventListener('input', function() {
     lastVolume = v;
     isMuted = v === 0;
     mainVideo.muted = isMuted;
-    volumeBtn.textContent = volumeIcon(v, isMuted);
-    syncMobileVolume();
+    updateVolumeUI();
 });
 
-// 初始同步一次手机音量显示
-syncMobileVolume();
+// 初始同步音量 UI（图标 + 滑块填充）
+updateVolumeUI();
