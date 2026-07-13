@@ -678,21 +678,8 @@ playerEl.addEventListener('touchend', (e) => {
     playVideo(next.id);
 }, { passive: true });
 
-// ===== 手机端：抽屉菜单 =====
-const menuToggle = document.getElementById('menuToggle');
-const sidebarEl = document.getElementById('sidebar');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-function setSidebar(open) {
-    sidebarEl.classList.toggle('open', open);
-    sidebarOverlay.classList.toggle('show', open);
-}
-menuToggle.addEventListener('click', () => setSidebar(!sidebarEl.classList.contains('open')));
-sidebarOverlay.addEventListener('click', () => setSidebar(false));
-// 点击菜单项后自动收起
-document.querySelectorAll('.sidebar .nav-item').forEach(item => {
-    item.addEventListener('click', () => setSidebar(false));
-});
+// ===== 手机端：抽屉菜单（共享逻辑见 storage.js）=====
+Store.initMobileSidebar();
 
 // ===== 视频中央暂停指示器（点画面切换播放/暂停，抖音风）=====
 const centerIndicator = document.getElementById('centerPlayIndicator');

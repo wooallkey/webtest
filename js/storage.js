@@ -103,7 +103,32 @@
         },
 
         // 暴露图片压缩工具
-        compressImage: compressImage
+        compressImage: compressImage,
+
+        // 初始化手机端抽屉菜单（三杆按钮开关 + 遮罩 + 点菜单项收起）
+        // 三个页面共用，元素 id 约定：menuToggle / sidebar / sidebarOverlay
+        initMobileSidebar: function () {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!menuToggle || !sidebar || !overlay) return;
+
+            const setSidebar = function (open) {
+                sidebar.classList.toggle('open', open);
+                overlay.classList.toggle('show', open);
+            };
+
+            menuToggle.addEventListener('click', function () {
+                setSidebar(!sidebar.classList.contains('open'));
+            });
+            overlay.addEventListener('click', function () {
+                setSidebar(false);
+            });
+            // 点击菜单项后自动收起
+            sidebar.querySelectorAll('.nav-item').forEach(function (item) {
+                item.addEventListener('click', function () { setSidebar(false); });
+            });
+        }
     };
 
     global.Store = Store;

@@ -9,8 +9,12 @@
     <link rel="icon" href="assets/logo.jpg" type="image/svg+xml">
 </head>
 <body>
+    <!-- 手机端：三杆菜单按钮 + 侧边栏遮罩 -->
+    <button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- 左侧导航栏 -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="logo">
             <img src="assets/logo.jpg" alt="VideoHub Logo" style="border-radius: 8px; height: 36px;">
             <span>VideoHub</span>

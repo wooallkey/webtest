@@ -105,4 +105,5 @@ document.querySelectorAll('.tabs-container .tab-btn').forEach(tab => {
 
 // 初始化
 Store.applyProfileToUI();
+Store.initMobileSidebar();
 renderUsers('following');

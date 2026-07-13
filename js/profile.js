@@ -211,6 +211,7 @@ document.querySelector('#editProfileModal .upload-submit-btn').addEventListener(
 });
 
 // 初始化
+Store.initMobileSidebar();
 applyProfile();
 renderWorks('videos');
 
