@@ -33,3 +33,6 @@ id_ecdsa.pub
 .env
 .env.*
 .ssh/
+
+# 文档（含部署细节，不提交到 GitHub，仅本地保留）
+doc/
