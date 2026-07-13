@@ -428,7 +428,12 @@ let isMuted = true;
 document.querySelector('.volume').addEventListener('click', function() {
     isMuted = !isMuted;
     mainVideo.muted = isMuted;
+    // 取消静音时确保有音量（浏览器自动播放策略下，muted 解除需 volume>0 才能出声）
+    if (!isMuted && mainVideo.volume === 0) {
+        mainVideo.volume = 1;
+    }
     this.textContent = isMuted ? '🔇' : '🔊';
+    mainVideo.play().catch(() => {});   // 用户主动点击，可解除自动播放限制
 });
 
 // 上传区域：选择视频素材（复用首页真实视频文件作为发布内容）
@@ -523,6 +528,27 @@ document.querySelector('.upload-submit-btn').addEventListener('click', function(
         renderVideoList();
         playVideo(newVideo.id);   // 发布后自动播放自己的新作品
     }, 1200);
+});
+
+// 推荐视频 展开/收起（默认收起，状态记入本地存储）
+const videoContainer = document.querySelector('.video-container');
+const toggleVideoListBtn = document.getElementById('toggleVideoList');
+const LIST_COLLAPSED_KEY = 'videohub_list_collapsed';
+
+function applyListCollapsed(collapsed) {
+    videoContainer.classList.toggle('list-collapsed', collapsed);
+    toggleVideoListBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    localStorage.setItem(LIST_COLLAPSED_KEY, collapsed ? '1' : '0');
+}
+
+// 初始状态：默认收起（首次访问）；之后读上次记录
+let listCollapsed = localStorage.getItem(LIST_COLLAPSED_KEY);
+listCollapsed = listCollapsed === null ? true : listCollapsed === '1';
+applyListCollapsed(listCollapsed);
+
+toggleVideoListBtn.addEventListener('click', () => {
+    listCollapsed = !listCollapsed;
+    applyListCollapsed(listCollapsed);
 });
 
 // 快捷键支持

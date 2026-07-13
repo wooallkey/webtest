@@ -71,7 +71,7 @@
         <div class="video-container">
             <!-- 主播放视频 -->
             <div class="main-video-player">
-                <video id="mainVideo" class="video-element" controls autoplay loop muted>
+                <video id="mainVideo" class="video-element" autoplay loop muted playsinline>
                     <source src="assets/videos/nature.mp4" type="video/mp4">
                 </video>
 
@@ -124,6 +124,12 @@
                         <button class="control-btn fullscreen">⛶</button>
                     </div>
                 </div>
+
+                <!-- 推荐视频 展开/收起 按钮 -->
+                <button class="toggle-video-list" id="toggleVideoList" aria-label="推荐视频" title="推荐视频">
+                    <span class="toggle-icon">›</span>
+                    <span class="toggle-tooltip">推荐视频</span>
+                </button>
             </div>
 
             <!-- 右侧视频列表 -->
