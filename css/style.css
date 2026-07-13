@@ -1027,6 +1027,9 @@ body {
     .video-overlay {
         flex-direction: column;
         align-items: flex-start;
+        /* 整体上移，避开底部控制条，防止作者描述被遮挡 */
+        bottom: 70px;
+        padding-bottom: 12px;
     }
 
     /* 互动按钮改为抖音式：竖排贴在视频右侧 */
@@ -1043,6 +1046,29 @@ body {
     /* 视频信息给右侧留出按钮空间，避免文字与按钮重叠 */
     .video-info {
         padding-right: 64px;
+    }
+
+    /* 作者信息行不换行，关注按钮保持单行显示 */
+    .author-info {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .author-details {
+        min-width: 0;
+    }
+
+    .author-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .follow-btn {
+        flex-shrink: 0;       /* 不被压缩，避免文字换行 */
+        white-space: nowrap;
+        padding: 5px 12px;
+        font-size: 12px;
     }
 
     /* ===== 视频中央暂停指示器（抖音风）===== */
