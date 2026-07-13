@@ -420,6 +420,54 @@ body {
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* 音量组：按钮 + 滑块 */
+.volume-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    opacity: 0;
+    transition: width 0.25s, opacity 0.25s;
+    overflow: hidden;
+}
+
+/* 桌面端：hover 控制条时滑块展开 */
+.video-controls:hover .volume-slider,
+.volume-group:hover .volume-slider,
+.volume-slider:focus {
+    width: 80px;
+    opacity: 1;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: -80px 0 0 76px var(--accent-color);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+}
+
 /* 右侧视频列表 */
 .video-list {
     width: 360px;
@@ -886,6 +934,11 @@ body {
         display: none;
     }
 
+    /* 手机端隐藏推荐视频展开按钮（窄屏不展示推荐列表）*/
+    .toggle-video-list {
+        display: none;
+    }
+
     .category-tabs {
         display: none;
     }
@@ -899,5 +952,22 @@ body {
         flex-direction: row;
         width: 100%;
         justify-content: space-around;
+    }
+
+    /* 手机端：控制条常显，无需 hover（触屏无持续 hover）*/
+    .video-controls {
+        opacity: 1;
+    }
+
+    /* 手机端：音量滑块常显，方便调音量 */
+    .video-controls .volume-slider {
+        width: 70px;
+        opacity: 1;
+    }
+
+    /* 触摸友好：控制按钮加大点击区 */
+    .control-btn {
+        font-size: 22px;
+        padding: 10px;
     }
 }

@@ -423,17 +423,41 @@ document.querySelector('.fullscreen').addEventListener('click', () => {
     }
 });
 
-// 音量控制
+// 音量控制（静音按钮 + 音量滑块联动）
 let isMuted = true;
-document.querySelector('.volume').addEventListener('click', function() {
+const volumeBtn = document.querySelector('.volume');
+const volumeSlider = document.getElementById('volumeSlider');
+
+// 根据音量返回对应图标
+function volumeIcon(vol, muted) {
+    if (muted || vol === 0) return '🔇';
+    if (vol < 0.5) return '🔈';
+    return '🔊';
+}
+
+// 静音按钮：在静音与上次音量间切换
+let lastVolume = 1;   // 记住取消静音时要恢复的音量
+volumeBtn.addEventListener('click', function() {
     isMuted = !isMuted;
     mainVideo.muted = isMuted;
-    // 取消静音时确保有音量（浏览器自动播放策略下，muted 解除需 volume>0 才能出声）
-    if (!isMuted && mainVideo.volume === 0) {
-        mainVideo.volume = 1;
+    if (!isMuted) {
+        // 取消静音：恢复上次音量（若为0则用1）
+        const v = lastVolume > 0 ? lastVolume : 1;
+        mainVideo.volume = v;
+        volumeSlider.value = Math.round(v * 100);
     }
-    this.textContent = isMuted ? '🔇' : '🔊';
+    this.textContent = volumeIcon(mainVideo.volume, isMuted);
     mainVideo.play().catch(() => {});   // 用户主动点击，可解除自动播放限制
+});
+
+// 音量滑块：拖动调节音量，自动解除静音
+volumeSlider.addEventListener('input', function() {
+    const v = this.value / 100;
+    mainVideo.volume = v;
+    lastVolume = v;
+    isMuted = v === 0;       // 拖到0视为静音
+    mainVideo.muted = isMuted;
+    volumeBtn.textContent = volumeIcon(v, isMuted);
 });
 
 // 上传区域：选择视频素材（复用首页真实视频文件作为发布内容）
@@ -573,7 +597,11 @@ document.addEventListener('keydown', (e) => {
         case 'KeyM':
             isMuted = !isMuted;
             mainVideo.muted = isMuted;
-            document.querySelector('.volume').textContent = isMuted ? '🔇' : '🔊';
+            if (!isMuted) {
+                mainVideo.volume = lastVolume > 0 ? lastVolume : 1;
+                volumeSlider.value = Math.round(mainVideo.volume * 100);
+            }
+            volumeBtn.textContent = volumeIcon(mainVideo.volume, isMuted);
             break;
         case 'KeyF':
             if (document.fullscreenElement) {
@@ -604,3 +632,48 @@ if (vId && videosData.find(v => v.id === vId)) {
 mainVideo.addEventListener('error', () => {
     console.log('Video load error, using fallback display');
 });
+
+// 手机端：上下滑动切换视频（上滑=下一个，下滑=上一个）
+// 按可播放的视频列表顺序循环；与进度条/控制条等点击区分，仅识别纵向大幅滑动
+const playerEl = document.querySelector('.main-video-player');
+let touchStartY = null;
+let touchStartX = null;
+let touchStartT = 0;
+
+playerEl.addEventListener('touchstart', (e) => {
+    // 单指起始点记录（用于判断滑动方向）
+    const t = e.changedTouches[0];
+    touchStartY = t.clientY;
+    touchStartX = t.clientX;
+    touchStartT = Date.now();
+}, { passive: true });
+
+playerEl.addEventListener('touchend', (e) => {
+    if (touchStartY === null) return;
+    const t = e.changedTouches[0];
+    const dy = touchStartY - t.clientY;    // 正=上滑(下一个)，负=下滑(上一个)
+    const dx = touchStartX - t.clientX;
+    const dt = Date.now() - touchStartT;
+    touchStartY = null;
+
+    // 横向滑动幅度更大时不处理（避免与其它横向手势冲突）
+    if (Math.abs(dx) > Math.abs(dy)) return;
+    // 距离过小或时间过长（疑似拖动进度）不触发
+    if (Math.abs(dy) < 50 || dt > 800) return;
+
+    // 排除点在控制条/互动按钮上的情况
+    const target = e.target;
+    if (target.closest('.video-controls') || target.closest('.interaction-panel') || target.closest('.video-info')) {
+        return;
+    }
+
+    const idx = videosData.findIndex(v => v.id === currentVideoId);
+    if (idx < 0) return;
+    let next;
+    if (dy > 0) {
+        next = videosData[(idx + 1) % videosData.length];
+    } else {
+        next = videosData[(idx - 1 + videosData.length) % videosData.length];
+    }
+    playVideo(next.id);
+}, { passive: true });
