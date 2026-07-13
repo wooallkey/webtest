@@ -80,7 +80,7 @@ function renderWorks(tab) {
     let data;
     switch (tab) {
         case 'videos':
-            data = myWorks;
+            data = Store.getUploads();   // 我的作品 = 我在首页上传发布的视频
             break;
         case 'likes':
             data = likedVideos;
@@ -89,23 +89,23 @@ function renderWorks(tab) {
             data = collectedVideos;
             break;
         default:
-            data = myWorks;
+            data = Store.getUploads();
     }
 
     if (data.length === 0) {
         worksGrid.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">🎬</div>
-                <p class="empty-text">还没有视频，快去发布你的第一个作品吧！</p>
-                <button class="empty-btn" onclick="location.href='index.html'">去首页看看</button>
+                <p class="empty-text">${tab === 'videos' ? '还没有作品，去首页发布你的第一个视频吧！' : '还没有视频，快去发现更多内容'}</p>
+                <button class="empty-btn" onclick="location.href='index.html'">${tab === 'videos' ? '去发布作品' : '去首页看看'}</button>
             </div>
         `;
         return;
     }
 
     worksGrid.innerHTML = data.map(work => `
-        <div class="work-card" data-id="${work.id}">
-            <img src="${work.thumbnail}" alt="${work.title}" class="work-card-thumbnail">
+        <div class="work-card" data-id="${work.id}" data-mine="${work.isMine ? 1 : 0}">
+            <img src="${work.cover || work.thumbnail}" alt="${work.title}" class="work-card-thumbnail">
             <span class="work-card-duration">${work.duration}</span>
             <div class="work-card-overlay">
                 <div class="work-card-title">${work.title}</div>
@@ -117,11 +117,14 @@ function renderWorks(tab) {
         </div>
     `).join('');
 
-    // 添加点击事件
+    // 添加点击事件：我的作品跳首页播放该视频，其它跳首页
     document.querySelectorAll('.work-card').forEach(card => {
         card.addEventListener('click', () => {
-            // 跳转到视频播放页面
-            location.href = 'index.html';
+            if (card.dataset.mine === '1') {
+                location.href = 'index.html?v=' + card.dataset.id;
+            } else {
+                location.href = 'index.html';
+            }
         });
     });
 }
@@ -136,8 +139,46 @@ document.querySelectorAll('.works-tab').forEach(tab => {
     });
 });
 
+// 填充个人资料到页面（并同步侧边栏）
+function applyProfile() {
+    const p = Store.getProfile();
+    document.querySelector('.profile-name').textContent = p.nickname;
+    document.querySelector('.profile-bio').textContent = p.bio;
+    document.querySelector('.profile-avatar-large img').src = p.avatar;
+    Store.applyProfileToUI();
+}
+
+// 大头像点击修改
+const avatarPicker = document.createElement('input');
+avatarPicker.type = 'file';
+avatarPicker.accept = 'image/*';
+avatarPicker.style.display = 'none';
+document.body.appendChild(avatarPicker);
+
+const avatarLarge = document.querySelector('.profile-avatar-large');
+avatarLarge.style.cursor = 'pointer';
+avatarLarge.title = '点击修改头像';
+avatarLarge.addEventListener('click', () => avatarPicker.click());
+
+avatarPicker.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        Store.compressImage(ev.target.result, 256, (compressed) => {
+            Store.setProfile({ avatar: compressed });
+            applyProfile();
+        });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';   // 允许重复选择同一文件
+});
+
 // 编辑资料弹窗
 document.querySelector('.edit-profile-btn').addEventListener('click', () => {
+    const p = Store.getProfile();
+    document.getElementById('editNickname').value = p.nickname;
+    document.getElementById('editBio').value = p.bio;
     editProfileModal.classList.add('show');
 });
 
@@ -151,20 +192,25 @@ editProfileModal.addEventListener('click', (e) => {
     }
 });
 
-// 保存修改
+// 保存修改（昵称/简介写入本地存储，全局生效）
 document.querySelector('#editProfileModal .upload-submit-btn').addEventListener('click', function() {
+    const nickname = document.getElementById('editNickname').value.trim() || Store.DEFAULT_NICKNAME;
+    const bio = document.getElementById('editBio').value.trim();
+    Store.setProfile({ nickname: nickname, bio: bio });
     this.textContent = '保存中...';
     setTimeout(() => {
+        applyProfile();
         this.textContent = '保存成功！';
         this.style.backgroundColor = '#28a745';
         setTimeout(() => {
             editProfileModal.classList.remove('show');
             this.textContent = '保存修改';
             this.style.backgroundColor = '';
-        }, 1000);
-    }, 1000);
+        }, 800);
+    }, 500);
 });
 
 // 初始化
+applyProfile();
 renderWorks('videos');
 

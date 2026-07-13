@@ -93,7 +93,7 @@ const commentsData = [
 let currentVideoId = 1;
 let likedVideos = new Set();
 let collectedVideos = new Set();
-let followedUsers = new Set();
+// 关注状态改由 Store 统一管理（见 js/storage.js），跨页面同步、刷新不丢
 
 // DOM 元素
 const mainVideo = document.getElementById('mainVideo');
@@ -123,7 +123,7 @@ function renderVideoList(category = 'all') {
     videoGrid.innerHTML = filteredVideos.map(video => `
         <div class="video-card ${video.id === currentVideoId ? 'playing' : ''}" data-video-id="${video.id}">
             <div class="video-thumbnail">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='68' viewBox='0 0 120 68'%3E%3Crect fill='%232a2a2a' width='120' height='68'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='14'%3E▶️ 播放%3C/text%3E%3C/svg%3E" alt="${video.title}">
+                <img src="${video.cover || 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%2768%27 viewBox=%270 0 120 68%27%3E%3Crect fill=%27%232a2a2a%27 width=%27120%27 height=%2768%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 fill=%27%23aaa%27 font-size=%2714%27%3E▶️ 播放%3C/text%3E%3C/svg%3E'}" alt="${video.title}">
                 <span class="duration">${video.duration}</span>
             </div>
             <div class="video-card-info">
@@ -182,8 +182,9 @@ function updateInteractionButtons(video) {
 
     collectBtn.classList.toggle('collected', collectedVideos.has(video.id));
 
-    followBtn.classList.toggle('following', followedUsers.has(video.author));
-    followBtn.textContent = followedUsers.has(video.author) ? '已关注' : '+ 关注';
+    const following = Store.isFollowing(video.author);
+    followBtn.classList.toggle('following', following);
+    followBtn.textContent = following ? '已关注' : '+ 关注';
 }
 
 // 点赞功能
@@ -221,16 +222,9 @@ document.querySelector('.collect-btn').addEventListener('click', function() {
 document.querySelector('.follow-btn').addEventListener('click', function() {
     const video = videosData.find(v => v.id === currentVideoId);
     const author = video.author;
-
-    if (followedUsers.has(author)) {
-        followedUsers.delete(author);
-        this.classList.remove('following');
-        this.textContent = '+ 关注';
-    } else {
-        followedUsers.add(author);
-        this.classList.add('following');
-        this.textContent = '已关注';
-    }
+    const nowFollowing = Store.toggleFollow(author);
+    this.classList.toggle('following', nowFollowing);
+    this.textContent = nowFollowing ? '已关注' : '+ 关注';
 });
 
 // 评论功能
@@ -437,57 +431,98 @@ document.querySelector('.volume').addEventListener('click', function() {
     this.textContent = isMuted ? '🔇' : '🔊';
 });
 
-// 上传区域点击
+// 上传区域：选择视频素材（复用首页真实视频文件作为发布内容）
 const uploadArea = document.getElementById('uploadArea');
-uploadArea.addEventListener('click', () => {
-    // 模拟文件选择
-    uploadArea.innerHTML = `
-        <div class="upload-icon">✅</div>
-        <p>视频已选择，正在准备上传...</p>
-        <small>文件名: demo_video.mp4</small>
-    `;
-});
+const uploadThemes = [
+    { key: 'nature', label: '🏔️ 自然风光', video: 'assets/videos/nature.mp4', cover: 'assets/nature_cover.jpg' },
+    { key: 'food', label: '🍜 美食推荐', video: 'assets/videos/food.mp4', cover: 'assets/food_cover.jpg' },
+    { key: 'beauty', label: '💄 美妆护肤', video: 'assets/videos/beauty.mp4', cover: 'assets/beauty_cover.jpg' }
+];
+let selectedTheme = null;
+
+function renderUploadArea() {
+    const themeBtns = uploadThemes.map(x => {
+        const on = x.key === selectedTheme;
+        const style = on
+            ? 'padding:8px 14px;border-radius:8px;border:1px solid #fe2c55;background:#fe2c55;color:#fff;cursor:pointer;font-size:14px;'
+            : 'padding:8px 14px;border-radius:8px;border:1px solid #fe2c55;background:transparent;color:#fe2c55;cursor:pointer;font-size:14px;';
+        return `<button type="button" class="theme-pick" data-theme="${x.key}" style="${style}">${x.label}</button>`;
+    }).join('');
+
+    if (selectedTheme) {
+        const t = uploadThemes.find(x => x.key === selectedTheme);
+        uploadArea.innerHTML = `
+            <div class="upload-icon">✅</div>
+            <p>已选择素材：<strong>${t.label}</strong></p>
+            <small>可点击下方其它主题更换</small>
+            <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${themeBtns}</div>
+        `;
+    } else {
+        uploadArea.innerHTML = `
+            <div class="upload-icon">📹</div>
+            <p>选择一个视频素材来发布你的作品</p>
+            <small>从下方主题中选择（演示用真实视频素材）</small>
+            <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${themeBtns}</div>
+        `;
+    }
+
+    uploadArea.querySelectorAll('.theme-pick').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedTheme = btn.dataset.theme;
+            renderUploadArea();
+        });
+    });
+}
+renderUploadArea();
 
 // 发布视频
-document.querySelector('.upload-submit-btn').addEventListener('click', () => {
-    const title = document.getElementById('videoTitle').value;
-    const desc = document.getElementById('videoDesc').value;
+document.querySelector('.upload-submit-btn').addEventListener('click', function() {
+    const title = document.getElementById('videoTitle').value.trim();
+    const desc = document.getElementById('videoDesc').value.trim();
 
-    if (title.trim()) {
-        // 模拟上传成功
-        this.textContent = '发布成功！';
-        this.style.backgroundColor = '#28a745';
-
-        setTimeout(() => {
-            uploadModal.classList.remove('show');
-            this.textContent = '发布视频';
-            this.style.backgroundColor = '';
-            document.getElementById('videoTitle').value = '';
-            document.getElementById('videoDesc').value = '';
-            uploadArea.innerHTML = `
-                <div class="upload-icon">📹</div>
-                <p>点击或拖拽视频到此处上传</p>
-                <small>支持 MP4, MOV 格式，最大 500MB</small>
-            `;
-
-            // 添加新视频到列表
-            const newVideo = {
-                id: Date.now(),
-                title: title,
-                author: '@我',
-                avatar: 'assets/avatar.svg',
-                date: '刚刚',
-                likes: 0,
-                comments: 0,
-                duration: '00:00',
-                video: 'assets/videos/nature.mp4',
-                category: 'all',
-                description: desc
-            };
-            videosData.unshift(newVideo);
-            renderVideoList();
-        }, 1500);
+    if (!selectedTheme) {
+        alert('请先选择一个视频素材');
+        return;
     }
+    if (!title) {
+        alert('请填写视频标题');
+        return;
+    }
+
+    const theme = uploadThemes.find(x => x.key === selectedTheme);
+    const profile = Store.getProfile();
+    const newVideo = {
+        id: Date.now(),
+        title: title,
+        author: profile.nickname,      // 作者 = 当前登录用户
+        avatar: profile.avatar,
+        date: '刚刚',
+        likes: 0,
+        comments: 0,
+        duration: '00:10',
+        video: theme.video,
+        cover: theme.cover,
+        category: theme.key,
+        description: desc || title,
+        isMine: true
+    };
+    Store.addUpload(newVideo);
+    videosData.unshift(newVideo);
+
+    this.textContent = '发布成功！';
+    this.style.backgroundColor = '#28a745';
+    setTimeout(() => {
+        uploadModal.classList.remove('show');
+        this.textContent = '发布视频';
+        this.style.backgroundColor = '';
+        document.getElementById('videoTitle').value = '';
+        document.getElementById('videoDesc').value = '';
+        selectedTheme = null;
+        renderUploadArea();
+        renderVideoList();
+        playVideo(newVideo.id);   // 发布后自动播放自己的新作品
+    }, 1200);
 });
 
 // 快捷键支持
@@ -524,9 +559,20 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// 合并本地已上传作品到视频列表（我的作品也会出现在首页推荐）
+Store.getUploads().forEach(v => videosData.unshift(v));
+
 // 初始化
 renderVideoList();
 renderComments();
+Store.applyProfileToUI();
+
+// 支持 ?v=<id> 直接播放指定视频（从"我的作品"点击跳转用）
+const vParam = new URLSearchParams(window.location.search).get('v');
+const vId = vParam ? parseInt(vParam) : NaN;
+if (vId && videosData.find(v => v.id === vId)) {
+    playVideo(vId);
+}
 
 // 视频错误处理（防止视频不存在时出错）
 mainVideo.addEventListener('error', () => {
