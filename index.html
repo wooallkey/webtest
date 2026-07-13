@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoHub - 短视频平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/logo.jpg" type="image/svg+xml">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="assets/logo.jpg" alt="VideoHub Logo" style="border-radius: 8px; height: 36px;">
+            <span>VideoHub</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item active" data-page="home">
+                <span class="icon">🔥</span>
+                <span>精选</span>
+            </a>
+            <a href="index.html" class="nav-item" data-page="recommend">
+                <span class="icon">✨</span>
+                <span>推荐</span>
+            </a>
+            <a href="following.html" class="nav-item" data-page="following">
+                <span class="icon">👥</span>
+                <span>关注</span>
+            </a>
+            <a href="profile.html" class="nav-item" data-page="profile">
+                <span class="icon">👤</span>
+                <span>我的</span>
+            </a>
+        </nav>
+
+        <div class="user-section">
+            <div class="user-avatar">
+                <img src="assets/avatar.svg" alt="User">
+            </div>
+            <span class="username">登录</span>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 顶部搜索栏 -->
+        <header class="top-header">
+            <div class="category-tabs">
+                <button class="tab-btn active" data-category="all">全部</button>
+                <button class="tab-btn" data-category="travel">旅行</button>
+                <button class="tab-btn" data-category="food">美食</button>
+                <button class="tab-btn" data-category="beauty">美妆</button>
+                <button class="tab-btn" data-category="music">音乐</button>
+                <button class="tab-btn" data-category="game">游戏</button>
+                <button class="tab-btn" data-category="tech">科技</button>
+            </div>
+
+            <div class="search-box">
+                <input type="text" placeholder="搜索你感兴趣的内容" id="searchInput">
+                <button class="search-btn">🔍</button>
+            </div>
+
+            <div class="header-actions">
+                <button class="action-btn" title="通知">🔔</button>
+                <button class="action-btn upload-btn" title="上传">📤</button>
+            </div>
+        </header>
+
+        <!-- 视频内容区 -->
+        <div class="video-container">
+            <!-- 主播放视频 -->
+            <div class="main-video-player">
+                <video id="mainVideo" class="video-element" controls autoplay loop muted>
+                    <source src="assets/videos/nature.mp4" type="video/mp4">
+                </video>
+
+                <!-- 视频信息覆盖层 -->
+                <div class="video-overlay">
+                    <div class="video-info">
+                        <div class="author-info">
+                            <img src="assets/avatar.svg" alt="Author" class="author-avatar">
+                            <div class="author-details">
+                                <span class="author-name">@旅行者小明</span>
+                                <span class="publish-date">3月15日</span>
+                            </div>
+                            <button class="follow-btn">+ 关注</button>
+                        </div>
+                        <div class="video-description">
+                            <p>🌿 探索大自然的美丽瞬间，记录生活中的每一份感动 #自然风光 #旅行日记 #治愈系</p>
+                        </div>
+                    </div>
+
+                    <!-- 互动按钮 -->
+                    <div class="interaction-panel">
+                        <button class="interaction-btn like-btn" data-video-id="1">
+                            <span class="icon">❤️</span>
+                            <span class="count">12.8万</span>
+                        </button>
+                        <button class="interaction-btn comment-btn" data-video-id="1">
+                            <span class="icon">💬</span>
+                            <span class="count">3286</span>
+                        </button>
+                        <button class="interaction-btn share-btn" data-video-id="1">
+                            <span class="icon">↗️</span>
+                            <span class="count">分享</span>
+                        </button>
+                        <button class="interaction-btn collect-btn" data-video-id="1">
+                            <span class="icon">⭐</span>
+                            <span class="count">收藏</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 播放控制 -->
+                <div class="video-controls">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="control-btn play-pause">⏸️</button>
+                        <button class="control-btn volume">🔇</button>
+                        <span class="time-display">01:25 / 03:00</span>
+                        <button class="control-btn fullscreen">⛶</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧视频列表 -->
+            <div class="video-list">
+                <h3 class="list-title">推荐视频</h3>
+                <div class="video-grid" id="videoGrid">
+                    <!-- 视频卡片将由JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 评论弹窗 -->
+    <div class="modal" id="commentModal">
+        <div class="modal-content comment-modal">
+            <div class="modal-header">
+                <h3>评论 (3286)</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="comment-input-section">
+                <textarea placeholder="写下你的评论..." id="commentInput"></textarea>
+                <button class="send-comment-btn">发送</button>
+            </div>
+            <div class="comments-list" id="commentsList">
+                <!-- 评论将由JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 分享弹窗 -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content share-modal">
+            <div class="modal-header">
+                <h3>分享视频</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="share-options">
+                <button class="share-option">📱 微信</button>
+                <button class="share-option">🐦 微博</button>
+                <button class="share-option">📋 QQ</button>
+                <button class="share-option">🔗 复制链接</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传弹窗 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content upload-modal">
+            <div class="modal-header">
+                <h3>上传视频</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📹</div>
+                <p>点击或拖拽视频到此处上传</p>
+                <small>支持 MP4, MOV 格式，最大 500MB</small>
+            </div>
+            <div class="upload-form">
+                <input type="text" placeholder="视频标题" id="videoTitle">
+                <textarea placeholder="视频描述" id="videoDesc" rows="3"></textarea>
+                <button class="upload-submit-btn">发布视频</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

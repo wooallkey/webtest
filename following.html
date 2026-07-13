@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关注 - VideoHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/following.css">
+    <link rel="icon" href="assets/logo.jpg" type="image/svg+xml">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="assets/logo.jpg" alt="VideoHub Logo" style="border-radius: 8px; height: 36px;">
+            <span>VideoHub</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item" data-page="home">
+                <span class="icon">🔥</span>
+                <span>精选</span>
+            </a>
+            <a href="index.html" class="nav-item" data-page="recommend">
+                <span class="icon">✨</span>
+                <span>推荐</span>
+            </a>
+            <a href="#" class="nav-item active" data-page="following">
+                <span class="icon">👥</span>
+                <span>关注</span>
+            </a>
+            <a href="profile.html" class="nav-item" data-page="profile">
+                <span class="icon">👤</span>
+                <span>我的</span>
+            </a>
+        </nav>
+
+        <div class="user-section">
+            <div class="user-avatar">
+                <img src="assets/avatar.svg" alt="User">
+            </div>
+            <span class="username">登录</span>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 顶部标签 -->
+        <header class="following-header">
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="following">关注的人</button>
+                <button class="tab-btn" data-tab="followers">粉丝</button>
+            </div>
+        </header>
+
+        <!-- 用户列表 -->
+        <div class="user-list" id="userList">
+            <!-- 用户将由JS动态生成 -->
+        </div>
+    </main>
+
+    <script src="js/following.js"></script>
+</body>
+</html>

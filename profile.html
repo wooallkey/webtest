@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - VideoHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="icon" href="assets/logo.jpg" type="image/svg+xml">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="assets/logo.jpg" alt="VideoHub Logo" style="border-radius: 8px; height: 36px;">
+            <span>VideoHub</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item" data-page="home">
+                <span class="icon">🔥</span>
+                <span>精选</span>
+            </a>
+            <a href="index.html" class="nav-item" data-page="recommend">
+                <span class="icon">✨</span>
+                <span>推荐</span>
+            </a>
+            <a href="following.html" class="nav-item" data-page="following">
+                <span class="icon">👥</span>
+                <span>关注</span>
+            </a>
+            <a href="#" class="nav-item active" data-page="profile">
+                <span class="icon">👤</span>
+                <span>我的</span>
+            </a>
+        </nav>
+
+        <div class="user-section">
+            <div class="user-avatar">
+                <img src="assets/avatar.svg" alt="User">
+            </div>
+            <span class="username">VideoHub 用户</span>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 个人资料头部 -->
+        <div class="profile-header">
+            <div class="profile-avatar-large">
+                <img src="assets/avatar.svg" alt="Profile">
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">VideoHub 用户</h1>
+                <p class="profile-bio">热爱生活，记录美好瞬间 🎬✨</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">15</span>
+                        <span class="stat-label">作品</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">1.2万</span>
+                        <span class="stat-label">粉丝</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">256</span>
+                        <span class="stat-label">关注</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">8.9万</span>
+                        <span class="stat-label">获赞</span>
+                    </div>
+                </div>
+                <button class="edit-profile-btn">编辑资料</button>
+            </div>
+        </div>
+
+        <!-- 作品分类标签 -->
+        <div class="works-tabs">
+            <button class="works-tab active" data-tab="videos">我的作品</button>
+            <button class="works-tab" data-tab="likes">喜欢的视频</button>
+            <button class="works-tab" data-tab="collects">收藏夹</button>
+        </div>
+
+        <!-- 作品网格 -->
+        <div class="works-grid" id="worksGrid">
+            <!-- 作品将由JS动态生成 -->
+        </div>
+    </main>
+
+    <!-- 编辑资料弹窗 -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content upload-modal">
+            <div class="modal-header">
+                <h3>编辑资料</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="upload-form">
+                <input type="text" placeholder="昵称" value="VideoHub 用户">
+                <textarea placeholder="个人简介" rows="3">热爱生活，记录美好瞬间 🎬✨</textarea>
+                <input type="text" placeholder="性别">
+                <input type="text" placeholder="生日">
+                <button class="upload-submit-btn">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>
