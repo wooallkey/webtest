@@ -677,3 +677,87 @@ playerEl.addEventListener('touchend', (e) => {
     }
     playVideo(next.id);
 }, { passive: true });
+
+// ===== 手机端：抽屉菜单 =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebarEl = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+function setSidebar(open) {
+    sidebarEl.classList.toggle('open', open);
+    sidebarOverlay.classList.toggle('show', open);
+}
+menuToggle.addEventListener('click', () => setSidebar(!sidebarEl.classList.contains('open')));
+sidebarOverlay.addEventListener('click', () => setSidebar(false));
+// 点击菜单项后自动收起
+document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+    item.addEventListener('click', () => setSidebar(false));
+});
+
+// ===== 视频中央暂停指示器（点画面切换播放/暂停，抖音风）=====
+const centerIndicator = document.getElementById('centerPlayIndicator');
+
+function showCenterIndicator() {
+    centerIndicator.classList.add('show');
+    clearTimeout(centerIndicator._t);
+    centerIndicator._t = setTimeout(() => centerIndicator.classList.remove('show'), 700);
+}
+// 暂停时持续显示，播放后短暂显示再隐藏
+mainVideo.addEventListener('pause', () => {
+    clearTimeout(centerIndicator._t);
+    centerIndicator.classList.add('show');
+});
+mainVideo.addEventListener('play', () => {
+    showCenterIndicator();
+});
+
+// 点击视频画面切换播放/暂停（排除点在控制条/互动按钮/音量浮层上）
+const playerForClick = document.querySelector('.main-video-player');
+playerForClick.addEventListener('click', (e) => {
+    if (e.target.closest('.video-controls') ||
+        e.target.closest('.interaction-panel') ||
+        e.target.closest('.video-info') ||
+        e.target.closest('.mobile-volume-bar') ||
+        e.target.closest('.toggle-video-list')) {
+        return;
+    }
+    if (mainVideo.paused) {
+        mainVideo.play().catch(() => {});
+    } else {
+        mainVideo.pause();
+    }
+});
+
+// ===== 手机端音量浮层：与主音量状态同步 =====
+const mobileVolumeBtn = document.getElementById('mobileVolumeBtn');
+const mobileVolumeSlider = document.getElementById('mobileVolumeSlider');
+
+function syncMobileVolume() {
+    mobileVolumeBtn.textContent = volumeIcon(mainVideo.volume, isMuted);
+    mobileVolumeSlider.value = Math.round((isMuted ? 0 : mainVideo.volume) * 100);
+}
+
+mobileVolumeBtn.addEventListener('click', function() {
+    isMuted = !isMuted;
+    mainVideo.muted = isMuted;
+    if (!isMuted) {
+        const v = lastVolume > 0 ? lastVolume : 1;
+        mainVideo.volume = v;
+    }
+    volumeBtn.textContent = volumeIcon(mainVideo.volume, isMuted);
+    syncMobileVolume();
+    mainVideo.play().catch(() => {});
+});
+
+mobileVolumeSlider.addEventListener('input', function() {
+    const v = this.value / 100;
+    mainVideo.volume = v;
+    lastVolume = v;
+    isMuted = v === 0;
+    mainVideo.muted = isMuted;
+    volumeBtn.textContent = volumeIcon(v, isMuted);
+    syncMobileVolume();
+});
+
+// 初始同步一次手机音量显示
+syncMobileVolume();

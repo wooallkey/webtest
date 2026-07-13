@@ -929,6 +929,22 @@ body {
     }
 }
 
+/* 手机端三杆菜单按钮 + 抽屉遮罩：桌面端隐藏 */
+.menu-toggle,
+.sidebar-overlay {
+    display: none;
+}
+
+/* 视频中央暂停指示器：桌面端不用，默认隐藏 */
+.center-play-indicator {
+    display: none;
+}
+
+/* 手机端右上音量浮层：桌面端隐藏 */
+.mobile-volume-bar {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .video-list {
         display: none;
@@ -943,6 +959,71 @@ body {
         display: none;
     }
 
+    /* ===== 侧边栏抽屉化 ===== */
+    .menu-toggle {
+        display: flex;
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 60;
+        width: 42px;
+        height: 42px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.45);
+        color: #fff;
+        font-size: 22px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 70;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 65;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar-overlay.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* 主内容区去左边距，让视频占满 */
+    .main-content {
+        margin-left: 0;
+    }
+
+    /* ===== 顶栏透明浮层 ===== */
+    .top-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        background: transparent;
+        border-bottom: none;
+        padding: 12px 14px 12px 64px;   /* 左侧留出三杆按钮空间 */
+        background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+    }
+
     .video-overlay {
         flex-direction: column;
         align-items: flex-start;
@@ -954,14 +1035,59 @@ body {
         justify-content: space-around;
     }
 
-    /* 手机端：控制条常显，无需 hover（触屏无持续 hover）*/
-    .video-controls {
+    /* ===== 视频中央暂停指示器（抖音风）===== */
+    .center-play-indicator {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 30;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.45);
+        color: #fff;
+        font-size: 40px;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+        backdrop-filter: blur(4px);
+    }
+
+    .center-play-indicator.show {
         opacity: 1;
     }
 
-    /* 手机端：音量滑块常显，方便调音量 */
-    .video-controls .volume-slider {
-        width: 70px;
+    /* ===== 手机端右上音量浮层 ===== */
+    .mobile-volume-bar {
+        display: flex;
+        position: absolute;
+        top: 64px;            /* 避开顶部透明顶栏 */
+        right: 14px;
+        z-index: 35;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(6px);
+    }
+
+    .mobile-volume-bar .volume-slider {
+        width: 90px;
+        opacity: 1;
+    }
+
+    /* 手机端隐藏底部控制条里的音量组（改用右上浮层）*/
+    .video-controls .volume-group {
+        display: none;
+    }
+
+    /* 手机端：底部控制条常显 */
+    .video-controls {
         opacity: 1;
     }
 
